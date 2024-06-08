@@ -1,12 +1,12 @@
-import { WebSocket } from "ws";
+import { Socket } from "socket.io";
 
 // handle connection to game
-export function handleConnection(ws: WebSocket) {
-  ws.on("message", (message) => {
-    console.log("Message:", message);
+export function handleConnection(socket: Socket) {
+  socket.on("message", (message) => {
+    console.log(`Recieved mesage: ${message}`);
   });
 
-  ws.on("close", () => {
-    console.log("client disconnected.");
+  socket.on("disconnect", () => {
+    console.log("Client disconnected.");
   });
 }
