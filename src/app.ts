@@ -13,11 +13,15 @@ const app = express();
 const server = createServer(app);
 
 // socket io connection
-const io = new SocketIOServer(server, {
-  cors: {
-    origin: "*",
+const io = new SocketIOServer(
+  server,
+
+  {
+    cors: {
+      origin: "*",
+    },
   },
-});
+);
 
 io.on("connection", handleConnection);
 
