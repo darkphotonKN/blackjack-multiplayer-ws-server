@@ -1,34 +1,20 @@
-import express from "express";
 import { createServer } from "http";
-import { Server as SocketIOServer } from "socket.io";
-import dotenv from "dotenv";
 import { handleConnection } from "./game";
+import dotenv from "dotenv";
+
+import { WebSocketServer } from "ws";
 
 // setup env
 dotenv.config();
 
-// create express App
-const app = express();
+// create server
+const server = createServer();
 
-const server = createServer(app);
+// create websocket server
+const wss = new WebSocketServer({ server });
 
-// socket io connection
-const io = new SocketIOServer(
-  server,
+wss.on("connection", (ws) => handleConnection(ws));
 
-  {
-    cors: {
-      origin: "*",
-    },
-  },
-);
+const PORT = Number(process.env.PORT) ?? 3030;
 
-io.on("connection", handleConnection);
-
-app.get("/", (req, res) => {
-  res.send("Blackjack Game");
-});
-
-server.listen(process.env.PORT, () =>
-  console.log(`server listening on port ${process.env.PORT}`),
-);
+server.listen(PORT, () => console.log(`Listening on port: ${PORT}`));
