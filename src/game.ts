@@ -16,7 +16,6 @@ export function handleConnection(ws: WebSocket) {
   clients.set(id, ws);
 
   // send their unique identifier to the client
-
   ws.send(JSON.stringify({ id }));
 
   ws.on("error", (error) => {
