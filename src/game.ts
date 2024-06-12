@@ -25,9 +25,10 @@ export function handleConnection(ws: WebSocket) {
   ws.on("message", (data) => {
     console.log("Received data:", data);
 
-    const action = decodeAction(data);
+    const { actionType, clientId } = decodeAction(data);
 
-    const encodedAction = encodeAction("testerson");
+    console.log("actionType received:", actionType);
+    console.log("clientId received:", clientId);
 
     // check clients
     console.log("client from map:", clients.get(id)?.url);

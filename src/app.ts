@@ -3,9 +3,18 @@ import { handleConnection } from "./game";
 import dotenv from "dotenv";
 
 import { WebSocketServer } from "ws";
+import { decodeAction, encodeAction } from "./utils/bufferConversion";
 
 // setup env
 dotenv.config();
+
+const testClientId = "1231231QIEQIWEUWQI123";
+const actionType = 0x02;
+const actionData = "deal";
+const encodedBuffer = encodeAction(actionType, testClientId, actionData);
+console.log("encodedBuffer:", encodedBuffer);
+
+decodeAction(encodedBuffer);
 
 // create server
 const server = createServer();
