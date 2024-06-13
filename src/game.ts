@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { decodeAction, encodeAction } from "./utils/bufferConversion";
+import { decodeAction, encodeClients } from "./utils/bufferConversion";
 import { v4 as uuid } from "uuid";
 import { clients } from "./data/users";
 
@@ -13,7 +13,7 @@ export function handleConnection(ws: WebSocket) {
   const id = uuid();
 
   // store user with generated id
-  clients.set(id, ws);
+  clients.set(id, `client-${clients.size + 1}`);
 
   // send their unique identifier to the client
   ws.send(JSON.stringify({ id }));
@@ -25,16 +25,22 @@ export function handleConnection(ws: WebSocket) {
   ws.on("message", (data) => {
     console.log("Received data:", data);
 
-    const { actionType, clientId } = decodeAction(data);
+    const { clientId, actionType, actionData } = decodeAction(data);
 
-    console.log("actionType received:", actionType);
     console.log("clientId received:", clientId);
+    console.log("actionType received:", actionType);
+    console.log("actionData received:", actionData);
 
-    // check clients
-    console.log("client from map:", clients.get(id)?.url);
+    console.log("clients:", clients);
+
+    const encodedClients = encodeClients(clients);
+
+    ws.send(encodedClients);
   });
 
-  ws.on("close", () => {
+  ws.on("close", (data) => {
     console.log("Client disconnected.");
+
+    // remove from connected clients
   });
 }
