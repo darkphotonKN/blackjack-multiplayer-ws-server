@@ -13,14 +13,13 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +26 ~/Documents/Code/Web/Fullstack/blackjack-multiplayer/src/game.ts
-badd +56 ~/Documents/Code/Web/Fullstack/blackjack-multiplayer/src/utils/bufferConversion.ts
-badd +5 ~/Documents/Code/Web/Fullstack/blackjack-multiplayer/src/app.ts
-badd +1 ~/Documents/Code/Web/Fullstack/blackjack-multiplayer/src/data/users.ts
+badd +20 ~/Documents/Code/Web/Fullstack/blackjack-multiplayer/src/game.ts
+badd +26 ~/Documents/Code/Web/Fullstack/blackjack-multiplayer/src/utils/bufferConversion.ts
+badd +19 ~/Documents/Code/Web/Fullstack/blackjack-multiplayer/src/app.ts
 argglobal
 %argdel
 $argadd ~/Documents/Code/Web/Fullstack/blackjack-multiplayer
-edit ~/Documents/Code/Web/Fullstack/blackjack-multiplayer/src/game.ts
+edit ~/Documents/Code/Web/Fullstack/blackjack-multiplayer/src/utils/bufferConversion.ts
 let s:save_splitbelow = &splitbelow
 let s:save_splitright = &splitright
 set splitbelow splitright
@@ -34,7 +33,7 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-balt ~/Documents/Code/Web/Fullstack/blackjack-multiplayer/src/data/users.ts
+balt ~/Documents/Code/Web/Fullstack/blackjack-multiplayer/src/app.ts
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -45,12 +44,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 35) / 70)
+let s:l = 24 - ((23 * winheight(0) + 24) / 49)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 1
-normal! 0
+keepjumps 24
+normal! 068|
 lcd ~/Documents/Code/Web/Fullstack/blackjack-multiplayer
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'

@@ -18,13 +18,18 @@ export function handleConnection(ws: WebSocket) {
   // send their unique identifier to the client
   ws.send(JSON.stringify({ id }));
 
+  // send clients to client
+
+  const encodedClients = encodeClients(clients);
+
+  ws.send(encodedClients);
+
   ws.on("error", (error) => {
     console.error("WebSocket error:", error);
   });
 
   ws.on("message", (data) => {
     console.log("Received data:", data);
-
     const { clientId, actionType, actionData } = decodeAction(data);
 
     console.log("clientId received:", clientId);
@@ -33,6 +38,7 @@ export function handleConnection(ws: WebSocket) {
 
     console.log("clients:", clients);
 
+    // update current clients
     const encodedClients = encodeClients(clients);
 
     ws.send(encodedClients);
