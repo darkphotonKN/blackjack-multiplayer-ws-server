@@ -1,7 +1,7 @@
-import WebSocket from "ws";
+import { WebSocket, RawData } from "ws";
 
 // decode action from buffer
-export function decodeAction(buffer: WebSocket.RawData): {
+export function decodeAction(buffer: RawData): {
   clientId: string;
   actionType: number;
   actionData: string;
@@ -17,7 +17,7 @@ export function decodeAction(buffer: WebSocket.RawData): {
   // decode clientId by extracting the subsequent digits of clientId out
   const clientId = buffer.subarray(1, 1 + clientIdLength).toString();
 
-  // extract action type
+  // extract action typ
   const actionType = buffer[1 + clientIdLength];
 
   // the remaining buffer will comprise of the action data
@@ -54,7 +54,7 @@ export function encodeAction(
 }
 
 // encode list of clients into a buffer
-export function encodeClients(clients: Map<string, string>): Buffer {
+export function encodeClients(clients: Map<string, WebSocket>): Buffer {
   const clientsJson = JSON.stringify(Object.fromEntries(clients));
 
   return Buffer.from(clientsJson);
