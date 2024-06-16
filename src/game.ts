@@ -1,12 +1,13 @@
 import { WebSocket } from "ws";
-import { decodeAction, encodeClients } from "./utils/bufferConversion";
 import { v4 as uuid } from "uuid";
+import { decodeAction, encodeClients } from "./utils/bufferConversion";
 import { clients } from "./data/client";
+import { initalizeGame } from "./utils/gameLogic";
+import { messageType } from "./types/general";
 
 /*TODO:
-1. Get rid of clients that disconnect.
-2. Track the current turn.
-3. Track current moves and values.
+- Track the current turn.
+- Track current moves and values.
 */
 
 // handle connection to game
@@ -17,18 +18,8 @@ export function handleConnection(ws: WebSocket) {
 
   // generate unique identifier for the current client
   const id = uuid();
-
-  // store user with generated id
-  clients.set(id, ws);
-
-  // send their unique identifier to the client
-  ws.send(JSON.stringify({ id }));
-
-  // send clients to client
-
-  const encodedClients = encodeClients(clients);
-
-  ws.send(encodedClients);
+  // initialize game for client
+  initalizeGame(id, ws);
 
   ws.on("error", (error) => {
     console.error("WebSocket error:", error);
@@ -38,6 +29,7 @@ export function handleConnection(ws: WebSocket) {
     console.log("Received data:", data);
     const { clientId, actionType, actionData } = decodeAction(data);
 
+    // determine action type
     console.log("clientId received:", clientId);
     console.log("actionType received:", actionType);
     console.log("actionData received:", actionData);

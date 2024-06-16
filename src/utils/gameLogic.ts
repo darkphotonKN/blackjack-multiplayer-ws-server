@@ -1,4 +1,29 @@
-import { Card, Deck, Hand, values, suits } from "@/types/game/card.types";
+import { WebSocket } from "ws";
+
+import { Card, Deck, values, suits } from "../types/game";
+import { clients } from "../data/client";
+import { encodeClients } from "../utils/bufferConversion";
+
+/*TODO:
+- Provide the state of the deck to client. 
+- Tie game moves to socket message connection types. 
+*/
+
+// initializes game by creating a new id for the connected client,
+// sending it to them and adding them to the client list
+export function initalizeGame(id: string, ws: WebSocket) {
+  // store user with generated id
+  clients.set(id, ws);
+
+  // send their unique identifier to the client
+  ws.send(JSON.stringify({ id }));
+
+  // send clients to client
+
+  const encodedClients = encodeClients(clients);
+
+  ws.send(encodedClients);
+}
 
 // initialize deck
 export function initalizeDeck(): Deck {
