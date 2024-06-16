@@ -39,6 +39,15 @@ interface GameStateMessage extends BaseMessage {
   status: GameState;
 }
 
+/*
+ * Game Message
+ *
+ * Represented as a buffer from messages transmitted to and from clients.
+ *
+ * Game Message Buffer Structure
+ * ClientIdLength [0] - ClientId [1 -> ClientIdLength] - MessageType[2 + ClientIdLength] -
+ * ActionType[3 + ClientIdLength] - ActionValue[4+ ClientIdLength -> BufferLength-1]
+ * */
 export type GameMessage =
   | ConnectionMessage
   | GameActionMessage

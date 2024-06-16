@@ -5,8 +5,14 @@ import { clients } from "../data/client";
 import { encodeClients } from "../utils/bufferConversion";
 
 /*TODO:
-- Provide the state of the deck to client. 
-- Tie game moves to socket message connection types. 
+- Provide the state of the deck to client. []
+- Tie game moves to socket message connection types. []
+  - Draw Card []
+  - Join Game [] 
+  - Forfeit Game [] 
+- Game State Checking []
+  - Check Each Player's Totals []
+  - Check For Winner []
 */
 
 // initializes game by creating a new id for the connected client,
@@ -19,7 +25,6 @@ export function initalizeGame(id: string, ws: WebSocket) {
   ws.send(JSON.stringify({ id }));
 
   // send clients to client
-
   const encodedClients = encodeClients(clients);
 
   ws.send(encodedClients);

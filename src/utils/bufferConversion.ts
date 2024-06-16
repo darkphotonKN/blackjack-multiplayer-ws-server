@@ -1,4 +1,5 @@
 import { WebSocket, RawData } from "ws";
+import { MessageType, messageType } from "../types/general";
 
 // decode action from buffer
 export function decodeAction(buffer: RawData): {
@@ -58,4 +59,27 @@ export function encodeClients(clients: Map<string, WebSocket>): Buffer {
   const clientsJson = JSON.stringify(Object.fromEntries(clients));
 
   return Buffer.from(clientsJson);
+}
+
+// get the message type
+export function decodeMessageType(message: Buffer): MessageType {
+  // extract the bit responsible for message type
+
+  // extract client id length
+  const clientIdLength = message[0];
+  const messageTypeBuffer = message[1 + clientIdLength];
+
+  let messageTypeKey: keyof typeof messageType | undefined;
+  // check if mesageTypeBuffer matches one of our MessageTypes
+
+  for (let [key, value] of Object.entries(messageType)) {
+    if (messageTypeBuffer === value) {
+      messageTypeKey = key as keyof typeof messageType;
+    }
+  }
+
+  if (!messageTypeKey) {
+    throw new Error("Decode messageType sent via web socket was invalid.");
+  }
+  return messageType[messageTypeKey];
 }
