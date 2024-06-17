@@ -34,8 +34,8 @@ export type Hand = [Card, Card, ...Card[]];
 // WS Communication Types
 
 export const gameState = {
-  INIT_DECK: 0x20,
-  SHUFFLE_DECK: 0x21,
+  INIT_GAME: 0x20,
+  RESET_GAME: 0x21,
 } as const;
 export type GameState = (typeof gameState)[keyof typeof gameState];
 

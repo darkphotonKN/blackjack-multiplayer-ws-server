@@ -1,5 +1,13 @@
-import { WebSocket, RawData } from "ws";
-import { MessageType, messageType } from "../types/general";
+import { RawData } from "ws";
+import {
+  ActionType,
+  MessageType,
+  clientsList,
+  messageType,
+} from "../types/message";
+import { Deck, gameAction, gameState } from "../types/game";
+import { Clients } from "../data/client";
+import { isCard, isClients } from "./typeGuards";
 
 // decode action from buffer
 export function decodeAction(buffer: RawData): {
@@ -31,23 +39,70 @@ export function decodeAction(buffer: RawData): {
   return { actionType, clientId, actionData };
 }
 
-// encode action into a buffer
-export function encodeAction(
+// encode message components into a single buffer
+export function encodeMessage(
   clientId: string,
-  actionType: number,
-  actionData: string,
+  messageType: MessageType,
+  chosenActionType: ActionType,
+  chosenActionValue?: string | Deck | Clients,
 ): Buffer {
-  const clientIdBuffer = Buffer.from(clientId);
   const clientIdLengthBuffer = Buffer.from([clientId.length]);
-  const actionDataBuffer = Buffer.from(actionData);
-  const actionTypeBuffer = Buffer.from([actionType]);
+  const clientIdBuffer = Buffer.from(clientId);
+  const messageTypeBuffer = Buffer.from([messageType]);
+  const actionTypeBuffer = Buffer.from([chosenActionType]);
+  let actionValueBuffer: Buffer | undefined = undefined;
+
+  // convert value to buffer based on chosenActionType and chosenActionValues
+  switch (chosenActionType) {
+    // Game State Actions
+    case gameState.INIT_GAME || gameState.RESET_GAME: {
+      // convert array of deck information into string then into a buffer
+      if (typeof chosenActionValue !== "string") {
+        actionValueBuffer = Buffer.from(JSON.stringify(chosenActionValue));
+      } else {
+        throw new Error(
+          "chosenActionValue is not the correct type 'Deck' when matching against the chosenActionType.",
+        );
+      }
+    }
+    // Clients List Actions
+    case clientsList.CLIENT_LIST: {
+      // check that value passed in matches Clients type
+      if (isClients(chosenActionValue)) {
+        actionValueBuffer = encodeClients(chosenActionValue);
+      } else {
+        throw new Error(
+          "chosenActionValue is not the correct type 'Clients' when matching against the chosenActionType.",
+        );
+      }
+    }
+
+    // Game Action Actions
+    case gameAction.DRAW_CARD: {
+      // check that value passed in matches the Card type
+      if (isCard(chosenActionValue)) {
+        actionValueBuffer = Buffer.from(JSON.stringify(chosenActionValue));
+      }
+    }
+
+    // Default case, everything else is a string
+    default: {
+      if (typeof chosenActionValue === "string") {
+        actionValueBuffer = Buffer.from(chosenActionValue);
+      }
+    }
+  }
+  if (!actionValueBuffer) {
+    throw new Error("Action Value while encoding message was invalid.");
+  }
 
   // construct action package into a single Buffer
   const actionPackageBuffer = Buffer.concat([
     clientIdLengthBuffer,
     clientIdBuffer,
+    messageTypeBuffer,
     actionTypeBuffer,
-    actionDataBuffer,
+    actionValueBuffer,
   ]);
 
   console.log("actionPackageBuffer", actionPackageBuffer);
@@ -55,7 +110,7 @@ export function encodeAction(
 }
 
 // encode list of clients into a buffer
-export function encodeClients(clients: Map<string, WebSocket>): Buffer {
+export function encodeClients(clients: Clients): Buffer {
   const clientsJson = JSON.stringify(Object.fromEntries(clients));
 
   return Buffer.from(clientsJson);

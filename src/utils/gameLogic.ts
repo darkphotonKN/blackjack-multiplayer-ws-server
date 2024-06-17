@@ -1,10 +1,13 @@
 import { WebSocket } from "ws";
+import { v4 as uuid } from "uuid";
 
 import { Card, Deck, values, suits } from "../types/game";
 import { clients } from "../data/client";
-import { encodeClients } from "../utils/bufferConversion";
+import { encodeClients, encodeMessage } from "../utils/bufferConversion";
+import { clientsList, messageType } from "../types/message";
 
 /*TODO:
+- Provide clientId and client List to client [x]
 - Provide the state of the deck to client. []
 - Tie game moves to socket message connection types. []
   - Draw Card []
@@ -16,18 +19,35 @@ import { encodeClients } from "../utils/bufferConversion";
 */
 
 // initializes game by creating a new id for the connected client,
-// sending it to them and adding them to the client list
-export function initalizeGame(id: string, ws: WebSocket) {
+// adding them to the client list, creating a buffer message with all this
+// information and returning the new client id
+export function initalizeGame(ws: WebSocket): { clientId: string } {
+  // TODO: check if client is already in the client list as part of a game
+
+  // generate unique identifier for the current client
+  const clientId = uuid();
+
   // store user with generated id
-  clients.set(id, ws);
+  clients.set(clientId, ws);
 
-  // send their unique identifier to the client
-  ws.send(JSON.stringify({ id }));
+  // create buffer containing all game information for starting a game
 
-  // send clients to client
-  const encodedClients = encodeClients(clients);
+  // clientId and clientList information
+  const messageT = messageType.CLIENTS_LIST;
+  const chosenActionType = clientsList.CLIENT_LIST;
 
-  ws.send(encodedClients);
+  const initGameMessage: Buffer = encodeMessage(
+    clientId,
+    messageT,
+    chosenActionType,
+    clients,
+  );
+  // deck information
+
+  // send information to client
+  ws.send(initGameMessage);
+
+  return { clientId };
 }
 
 // initialize deck

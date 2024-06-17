@@ -1,9 +1,7 @@
 import { WebSocket } from "ws";
-import { v4 as uuid } from "uuid";
 import { decodeAction, encodeClients } from "./utils/bufferConversion";
 import { clients } from "./data/client";
 import { initalizeGame } from "./utils/gameLogic";
-import { messageType } from "./types/general";
 
 /*TODO:
 - Track the current turn.
@@ -16,10 +14,8 @@ export function handleConnection(ws: WebSocket) {
   ws.send("Connected to WebSocket server");
   console.log("Client connected.");
 
-  // generate unique identifier for the current client
-  const id = uuid();
   // initialize game for client
-  initalizeGame(id, ws);
+  const { clientId } = initalizeGame(ws);
 
   ws.on("error", (error) => {
     console.error("WebSocket error:", error);
@@ -43,21 +39,22 @@ export function handleConnection(ws: WebSocket) {
   });
 
   ws.on("close", (data) => {
-    console.log("Client disconnected. clientId:", id);
+    console.log("Client disconnected. clientId:", clientId);
 
     // remove from connected clients
-    clients.delete(id);
+    clients.delete(clientId);
 
     // loop and check who is in readyState among the clients
     clients.forEach((client) => {
       // check that client is still ready
       if (client.readyState === WebSocket.OPEN) {
       }
+
       // inform all ready clients the client that disconnected
       client.send(
         JSON.stringify({
-          message: `The client disconnected ${id}`,
-          id,
+          message: `The client disconnected ${clientId}`,
+          id: clientId,
           type: "Disconnection.",
         }),
       );
