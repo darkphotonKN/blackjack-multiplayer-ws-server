@@ -3,8 +3,8 @@ import { v4 as uuid } from "uuid";
 
 import { Card, Deck, values, suits } from "../types/game";
 import { clients } from "../data/client";
-import { encodeClients, encodeMessage } from "../utils/bufferConversion";
-import { clientsList, messageType } from "../types/message";
+import { encodeMessage } from "../utils/bufferConversion";
+import { GameMessageBundle, clientsList, messageType } from "../types/message";
 
 /*TODO:
 - Provide clientId and client List to client [x]
@@ -15,8 +15,7 @@ import { clientsList, messageType } from "../types/message";
   - Forfeit Game [] 
 - Game State Checking []
   - Check Each Player's Totals []
-  - Check For Winner []
-*/
+  - Check For Winner [] */
 
 // initializes game by creating a new id for the connected client,
 // adding them to the client list, creating a buffer message with all this
@@ -30,18 +29,24 @@ export function initalizeGame(ws: WebSocket): { clientId: string } {
   // store user with generated id
   clients.set(clientId, ws);
 
+  console.log(
+    "Clients List current (before encoding):",
+    clients.toString().slice(1, 50),
+  );
   // create buffer containing all game information for starting a game
 
   // clientId and clientList information
-  const messageT = messageType.CLIENTS_LIST;
-  const chosenActionType = clientsList.CLIENT_LIST;
+  const selectedMessageType = messageType.CLIENTS_LIST;
+  const selectedActionType = clientsList.CLIENT_LIST;
 
-  const initGameMessage: Buffer = encodeMessage(
+  const messageBundle: GameMessageBundle = {
     clientId,
-    messageT,
-    chosenActionType,
-    clients,
-  );
+    selectedMessageType,
+    selectedActionType,
+    selectedActionValue: clients,
+  };
+
+  const initGameMessage: Buffer = encodeMessage(messageBundle);
   // deck information
 
   // send information to client

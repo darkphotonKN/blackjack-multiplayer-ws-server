@@ -23,19 +23,12 @@ export function handleConnection(ws: WebSocket) {
 
   ws.on("message", (data) => {
     console.log("Received data:", data);
-    const { clientId, actionType, actionData } = decodeAction(data);
+    // const { clientId, actionType, actionData } = decodeAction(data);
 
     // determine action type
-    console.log("clientId received:", clientId);
-    console.log("actionType received:", actionType);
-    console.log("actionData received:", actionData);
-
-    console.log("clients:", clients);
-
-    // update current clients
-    const encodedClients = encodeClients(clients);
-
-    ws.send(encodedClients);
+    // console.log("clientId received:", clientId);
+    // console.log("actionType received:", actionType);
+    // console.log("actionData received:", actionData);
   });
 
   ws.on("close", (data) => {

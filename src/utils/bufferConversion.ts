@@ -1,14 +1,23 @@
 import { RawData } from "ws";
 import {
   ActionType,
+  GameMessageBundle,
   MessageType,
   clientsList,
   messageType,
 } from "../types/message";
-import { Deck, gameAction, gameState } from "../types/game";
+import {
+  Card,
+  Deck,
+  gameAction,
+  gameState,
+  suits,
+  values,
+} from "../types/game";
 import { Clients } from "../data/client";
 import { isCard, isClients } from "./typeGuards";
 
+// TODO: refactor to match new encodeMessage
 // decode action from buffer
 export function decodeAction(buffer: RawData): {
   clientId: string;
@@ -40,39 +49,42 @@ export function decodeAction(buffer: RawData): {
 }
 
 // encode message components into a single buffer
-export function encodeMessage(
-  clientId: string,
-  messageType: MessageType,
-  chosenActionType: ActionType,
-  chosenActionValue?: string | Deck | Clients,
-): Buffer {
+export function encodeMessage(gameMessageBundle: GameMessageBundle): Buffer {
+  const {
+    clientId,
+    selectedMessageType,
+    selectedActionType,
+    selectedActionValue,
+  } = gameMessageBundle;
+
   const clientIdLengthBuffer = Buffer.from([clientId.length]);
   const clientIdBuffer = Buffer.from(clientId);
-  const messageTypeBuffer = Buffer.from([messageType]);
-  const actionTypeBuffer = Buffer.from([chosenActionType]);
+  const messageTypeBuffer = Buffer.from([selectedMessageType]);
+  const actionTypeBuffer = Buffer.from([selectedActionType]);
   let actionValueBuffer: Buffer | undefined = undefined;
 
-  // convert value to buffer based on chosenActionType and chosenActionValues
-  switch (chosenActionType) {
+  // convert value to buffer based on selectedActionType and chosenActionValues
+  switch (selectedActionType) {
     // Game State Actions
     case gameState.INIT_GAME || gameState.RESET_GAME: {
       // convert array of deck information into string then into a buffer
-      if (typeof chosenActionValue !== "string") {
-        actionValueBuffer = Buffer.from(JSON.stringify(chosenActionValue));
+      if (typeof selectedActionValue !== "string") {
+        actionValueBuffer = Buffer.from(JSON.stringify(selectedActionValue));
       } else {
         throw new Error(
-          "chosenActionValue is not the correct type 'Deck' when matching against the chosenActionType.",
+          "selectedActionValue is not the correct type 'Deck' when matching against the chosenActionType.",
         );
       }
     }
     // Clients List Actions
     case clientsList.CLIENT_LIST: {
       // check that value passed in matches Clients type
-      if (isClients(chosenActionValue)) {
-        actionValueBuffer = encodeClients(chosenActionValue);
+      if (isClients(selectedActionValue)) {
+        console.log("encoding clients for browser-client");
+        actionValueBuffer = encodeClients(selectedActionValue);
       } else {
         throw new Error(
-          "chosenActionValue is not the correct type 'Clients' when matching against the chosenActionType.",
+          "selectedActionValue is not the correct type 'Clients' when matching against the chosenActionType.",
         );
       }
     }
@@ -80,18 +92,19 @@ export function encodeMessage(
     // Game Action Actions
     case gameAction.DRAW_CARD: {
       // check that value passed in matches the Card type
-      if (isCard(chosenActionValue)) {
-        actionValueBuffer = Buffer.from(JSON.stringify(chosenActionValue));
+      if (isCard(selectedActionValue)) {
+        actionValueBuffer = Buffer.from(JSON.stringify(selectedActionValue));
       }
     }
 
     // Default case, everything else is a string
     default: {
-      if (typeof chosenActionValue === "string") {
-        actionValueBuffer = Buffer.from(chosenActionValue);
+      if (typeof selectedActionValue === "string") {
+        actionValueBuffer = Buffer.from(selectedActionValue);
       }
     }
   }
+
   if (!actionValueBuffer) {
     throw new Error("Action Value while encoding message was invalid.");
   }

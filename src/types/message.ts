@@ -1,5 +1,5 @@
 import { Clients } from "../data/client";
-import { Deck, GameAction, GameState } from "./game";
+import { Deck, Card, GameAction, GameState } from "./game";
 
 // message type - determines what type of ws message type
 export const messageType = {
@@ -29,24 +29,6 @@ interface BaseMessage {
   clientId: string;
 }
 
-interface ConnectionMessage extends BaseMessage {
-  type: typeof messageType.CONNECTION;
-  actionType: ConnectionStatus;
-  actionValue: Clients;
-}
-
-interface GameActionMessage extends BaseMessage {
-  type: typeof messageType.GAME_ACTION;
-  actionType: GameAction;
-  actionValue: string;
-}
-
-interface GameStateMessage extends BaseMessage {
-  type: typeof messageType.GAME_STATE;
-  actionType: GameState;
-  actionValue: Deck;
-}
-
 // Sub set of types based on message type
 export type ActionType =
   | ConnectionStatus
@@ -63,7 +45,33 @@ export type ActionType =
  * ClientIdLength [0] - ClientId [1 -> ClientIdLength] - MessageType[2 + ClientIdLength] -
  * ActionType[3 + ClientIdLength] - ActionValue[4+ ClientIdLength -> BufferLength-1]
  * */
-export type GameMessage =
-  | ConnectionMessage
-  | GameActionMessage
-  | GameStateMessage;
+
+export type GameMessageBundle = {
+  clientId: string;
+  selectedMessageType: MessageType;
+  selectedActionType: ActionType;
+  selectedActionValue?: string | Deck | Card | Clients;
+};
+
+// interface ConnectionMessage extends BaseMessage {
+//   type: typeof messageType.CONNECTION;
+//   actionType: ConnectionStatus;
+//   actionValue: Clients;
+// }
+//
+// interface GameActionMessage extends BaseMessage {
+//   type: typeof messageType.GAME_ACTION;
+//   actionType: GameAction;
+//   actionValue: string;
+// }
+//
+// interface GameStateMessage extends BaseMessage {
+//   type: typeof messageType.GAME_STATE;
+//   actionType: GameState;
+//   actionValue: Deck;
+// }
+// jk
+// export type GameMessage =
+//   | ConnectionMessage
+//   | GameActionMessage
+//   | GameStateMessage;
