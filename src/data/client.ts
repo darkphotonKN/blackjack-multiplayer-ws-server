@@ -1,4 +1,3 @@
-import { WebSocket } from "ws";
+import { Clients } from "../types/clients";
 
-export type Clients = Map<string, WebSocket>;
-export const clients: Clients = new Map<string, WebSocket>();
+export const clients: Clients = new Map();

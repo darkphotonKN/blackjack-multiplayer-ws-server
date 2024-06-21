@@ -1,4 +1,3 @@
-import { RawData } from "ws";
 import {
   ActionType,
   GameMessageBundle,
@@ -6,46 +5,40 @@ import {
   clientsList,
   messageType,
 } from "../types/message";
-import {
-  Card,
-  Deck,
-  gameAction,
-  gameState,
-  suits,
-  values,
-} from "../types/game";
-import { Clients } from "../data/client";
-import { isCard, isClients } from "./typeGuards";
+import { gameAction, gameState } from "../types/game";
+import { isCard, isClientInformation } from "./typeGuards";
+import { ClientInformation } from "../types/clients";
 
-// TODO: refactor to match new encodeMessage
-// decode action from buffer
-export function decodeAction(buffer: RawData): {
-  clientId: string;
-  actionType: number;
-  actionData: string;
-} {
-  // guarding against non-buffer
-  if (!Buffer.isBuffer(buffer)) {
-    throw new Error("data is not a buffer.");
+// decode buffer into pre-organized info
+export function decodeMessage(message: Buffer): GameMessageBundle {
+  const clientIdLength = message[0];
+  const clientId = message.subarray(1, clientIdLength + 1).toString();
+  const selectedMessageType = message[1 + clientIdLength] as MessageType;
+  const selectedActionType = message[1 + clientIdLength + 1] as ActionType;
+  const actionBuffer = message.subarray(1 + clientIdLength + 1 + 1);
+
+  // convert action value differently depending on transfered action value type
+  let selectedActionValue;
+  switch (selectedActionType) {
+    case clientsList.CLIENT_LIST:
+    case gameAction.DRAW_CARD:
+    case gameState.INIT_GAME:
+    case gameState.RESET_GAME: {
+      console.log("Type is to be parsed!!!");
+      selectedActionValue = JSON.parse(actionBuffer.toString());
+    }
+    // every other situation just revert the Buffer back to a string
+    default: {
+      selectedActionValue = actionBuffer.toString();
+    }
   }
 
-  // decode action which is represented by the first index of the Buffer
-  const clientIdLength = buffer[0];
-
-  // decode clientId by extracting the subsequent digits of clientId out
-  const clientId = buffer.subarray(1, 1 + clientIdLength).toString();
-
-  // extract action typ
-  const actionType = buffer[1 + clientIdLength];
-
-  // the remaining buffer will comprise of the action data
-  const actionData = buffer.subarray(2 + clientIdLength).toString();
-
-  console.log("clientIdLength:", clientIdLength);
-  console.log("actionType:", actionType);
-  console.log("clientId decoded:", clientId);
-  console.log("actionData decoded:", actionData);
-  return { actionType, clientId, actionData };
+  return {
+    clientId,
+    selectedMessageType,
+    selectedActionType,
+    selectedActionValue,
+  };
 }
 
 // encode message components into a single buffer
@@ -76,12 +69,14 @@ export function encodeMessage(gameMessageBundle: GameMessageBundle): Buffer {
         );
       }
     }
+
     // Clients List Actions
     case clientsList.CLIENT_LIST: {
       // check that value passed in matches Clients type
-      if (isClients(selectedActionValue)) {
+      if (isClientInformation(selectedActionValue)) {
         console.log("encoding clients for browser-client");
-        actionValueBuffer = encodeClients(selectedActionValue);
+        // TODO: Currently sending client's WS object back - don't actually need to
+        actionValueBuffer = encodeClientsInfo(selectedActionValue);
       } else {
         throw new Error(
           "selectedActionValue is not the correct type 'Clients' when matching against the chosenActionType.",
@@ -123,10 +118,9 @@ export function encodeMessage(gameMessageBundle: GameMessageBundle): Buffer {
 }
 
 // encode list of clients into a buffer
-export function encodeClients(clients: Clients): Buffer {
-  const clientsJson = JSON.stringify(Object.fromEntries(clients));
-
-  return Buffer.from(clientsJson);
+export function encodeClientsInfo(clientsInfo: ClientInformation): Buffer {
+  const clientsJsonString = JSON.stringify(clientsInfo);
+  return Buffer.from(clientsJsonString, "utf8");
 }
 
 // get the message type

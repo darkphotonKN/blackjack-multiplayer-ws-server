@@ -29,25 +29,32 @@ export function initalizeGame(ws: WebSocket): { clientId: string } {
   // store user with generated id
   clients.set(clientId, ws);
 
-  console.log(
-    "Clients List current (before encoding):",
-    clients.toString().slice(1, 50),
-  );
-  // create buffer containing all game information for starting a game
+  // --- Create buffer containing all game information for starting a game
 
   // clientId and clientList information
   const selectedMessageType = messageType.CLIENTS_LIST;
   const selectedActionType = clientsList.CLIENT_LIST;
 
+  // the client's personal clientId and the client keys (clientIds) to be sent to client web
+  //
+  // convert client Map into an array of only ids
+  const clientIdList = [...clients.keys()].map((id) => id);
+  const clientInformation = {
+    clientId,
+    clientIdList,
+  };
+
   const messageBundle: GameMessageBundle = {
     clientId,
     selectedMessageType,
     selectedActionType,
-    selectedActionValue: clients,
+    selectedActionValue: clientInformation,
   };
 
   const initGameMessage: Buffer = encodeMessage(messageBundle);
   // deck information
+
+  console.log("You just connected for the first time!");
 
   // send information to client
   ws.send(initGameMessage);

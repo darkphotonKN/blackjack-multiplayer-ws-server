@@ -1,4 +1,4 @@
-import { Clients } from "../data/client";
+import { ClientInformation } from "./clients";
 import { Deck, Card, GameAction, GameState } from "./game";
 
 // message type - determines what type of ws message type
@@ -24,10 +24,10 @@ export type ConnectionStatus =
 // discriminated unions for type safety
 
 // base required properties
-interface BaseMessage {
-  type: MessageType;
-  clientId: string;
-}
+// interface BaseMessage {
+//   type: MessageType;
+//   clientId: string;
+// }
 
 // Sub set of types based on message type
 export type ActionType =
@@ -50,28 +50,5 @@ export type GameMessageBundle = {
   clientId: string;
   selectedMessageType: MessageType;
   selectedActionType: ActionType;
-  selectedActionValue?: string | Deck | Card | Clients;
+  selectedActionValue?: string | Deck | Card | ClientInformation;
 };
-
-// interface ConnectionMessage extends BaseMessage {
-//   type: typeof messageType.CONNECTION;
-//   actionType: ConnectionStatus;
-//   actionValue: Clients;
-// }
-//
-// interface GameActionMessage extends BaseMessage {
-//   type: typeof messageType.GAME_ACTION;
-//   actionType: GameAction;
-//   actionValue: string;
-// }
-//
-// interface GameStateMessage extends BaseMessage {
-//   type: typeof messageType.GAME_STATE;
-//   actionType: GameState;
-//   actionValue: Deck;
-// }
-// jk
-// export type GameMessage =
-//   | ConnectionMessage
-//   | GameActionMessage
-//   | GameStateMessage;
