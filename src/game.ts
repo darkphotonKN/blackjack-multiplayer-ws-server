@@ -3,8 +3,9 @@ import { clients } from "./data/client";
 import { initalizeGame } from "./utils/gameLogic";
 
 /*TODO:
-- Track the current turn.
-- Track current moves and values.
+- Track the current turn. []
+- Track current moves and values. []
+- Send the correct encoded message format on client disconnection
 */
 
 // handle connection to game
@@ -33,8 +34,12 @@ export function handleConnection(ws: WebSocket) {
   ws.on("close", (data) => {
     console.log("Client disconnected. clientId:", clientId);
 
+    console.log("clients before deleting:", clients.keys());
+
     // remove from connected clients
     clients.delete(clientId);
+
+    console.log("clients after deleted:", clients.keys());
 
     // loop and check who is in readyState among the clients
     clients.forEach((client) => {
