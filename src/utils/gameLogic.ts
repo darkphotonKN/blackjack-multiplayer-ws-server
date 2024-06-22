@@ -1,7 +1,14 @@
 import { WebSocket } from "ws";
 import { v4 as uuid } from "uuid";
 
-import { Card, Deck, values, suits } from "../types/game";
+import {
+  Card,
+  Deck,
+  values,
+  suits,
+  gameAction,
+  gameState,
+} from "../types/game";
 import { clients } from "../data/client";
 import { encodeMessage } from "../utils/bufferConversion";
 import { GameMessageBundle, clientsList, messageType } from "../types/message";
@@ -9,6 +16,7 @@ import { GameMessageBundle, clientsList, messageType } from "../types/message";
 /*TODO:
 - Provide clientId and client List to client [x]
 - Provide the state of the deck to client. []
+- Keep deck state per 4 players and don't reset [] 
 - Tie game moves to socket message connection types. []
   - Draw Card []
   - Join Game [] 
@@ -59,6 +67,23 @@ export function initalizeGame(ws: WebSocket): { clientId: string } {
   // send information to client
   ws.send(initGameMessage);
 
+  // also initialize the deck
+  const selectedActionValueInitDeck = initalizeDeck();
+  const selectedMessageTypeInitDeck = messageType.GAME_STATE;
+  const selectedActionTypeInitDeck = gameState.INIT_GAME;
+
+  console.log("Initialized deck:", selectedActionValueInitDeck);
+  const messageBundleInitDeck: GameMessageBundle = {
+    clientId,
+    selectedMessageType: selectedMessageTypeInitDeck,
+    selectedActionType: selectedActionTypeInitDeck,
+    selectedActionValue: selectedActionValueInitDeck,
+  };
+
+  const initDeckMessage = encodeMessage(messageBundleInitDeck);
+
+  // send message bundle with initialized deck
+  ws.send(initDeckMessage);
   return { clientId };
 }
 

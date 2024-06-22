@@ -68,6 +68,7 @@ export function encodeMessage(gameMessageBundle: GameMessageBundle): Buffer {
           "selectedActionValue is not the correct type 'Deck' when matching against the chosenActionType.",
         );
       }
+      break;
     }
 
     // Clients List Actions
@@ -82,6 +83,7 @@ export function encodeMessage(gameMessageBundle: GameMessageBundle): Buffer {
           "selectedActionValue is not the correct type 'Clients' when matching against the chosenActionType.",
         );
       }
+      break;
     }
 
     // Game Action Actions
@@ -90,6 +92,7 @@ export function encodeMessage(gameMessageBundle: GameMessageBundle): Buffer {
       if (isCard(selectedActionValue)) {
         actionValueBuffer = Buffer.from(JSON.stringify(selectedActionValue));
       }
+      break;
     }
 
     // Default case, everything else is a string
@@ -97,6 +100,7 @@ export function encodeMessage(gameMessageBundle: GameMessageBundle): Buffer {
       if (typeof selectedActionValue === "string") {
         actionValueBuffer = Buffer.from(selectedActionValue);
       }
+      break;
     }
   }
 
